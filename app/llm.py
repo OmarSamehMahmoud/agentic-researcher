@@ -142,7 +142,7 @@ def route() -> list[tuple[str, str]]:
     s = settings.load()
     order = {"anthropic": [("anthropic", s["anthropic_model"]), ("ollama", s["ollama_model"])],
              "ollama": [("ollama", s["ollama_model"])]}[s["provider"]]
-    if os.environ.get("AZURE_OPENAI_ENDPOINT"):
+    if s["provider"] == "anthropic" and os.environ.get("AZURE_OPENAI_ENDPOINT"):
         order.append(("azure", os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt")))
     if not settings.key_status()["set"]:
         order = [o for o in order if o[0] != "anthropic"]
@@ -151,11 +151,12 @@ def route() -> list[tuple[str, str]]:
 
 def available() -> bool:
     """Is any model reachable? (Decides agent mode vs preview mode.)"""
-    if settings.key_status()["set"] or os.environ.get("AZURE_OPENAI_ENDPOINT"):
+    s = settings.load()
+    if s["provider"] == "anthropic" and (settings.key_status()["set"] or os.environ.get("AZURE_OPENAI_ENDPOINT")):
         return True
     try:
         names = {m["model"] for m in ollama.list()["models"]}
-        return settings.load()["ollama_model"] in names
+        return s["ollama_model"] in names
     except Exception:
         return False
 
