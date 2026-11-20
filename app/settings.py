@@ -19,9 +19,9 @@ CLAUDE_MODELS = ["claude-opus-5-5", "claude-sonnet-5-5", "claude-haiku-5-5"]
 PROVIDERS = ["anthropic", "ollama"]
 DEFAULTS = {
     "reviewer_name": "",
-    "provider": "anthropic",           # main model; the other is the fallback (Phase 5)
+    "provider": "ollama",               # Gemma 4 Cloud through the signed-in local Ollama server
     "anthropic_model": "claude-haiku-5-5",
-    "ollama_model": "qwen2.5:7b",
+    "ollama_model": "gemma4:cloud",
     "cost_cap_usd": 0.05,              # per run
     "claim_checker": "rules",          # rules | auto (auto adds the fine-tuned model: fewer wrong citations, lower recall; see README)
     "tool_transport": "mcp",           # mcp | direct
@@ -104,7 +104,7 @@ def clear_key() -> dict:
 
 def ollama_models() -> list[str]:
     try:
-        with urllib.request.urlopen("http://127.0.0.1:11434/api/tags", timeout=1.5) as r:
+        with urllib.request.urlopen(os.environ.get("OLLAMA_HOST", "http://127.0.0.1:11434").rstrip("/") + "/api/tags", timeout=3) as r:
             return sorted(m["name"] for m in json.load(r).get("models", []) if "embed" not in m["name"])
     except (OSError, ValueError):
         return []
