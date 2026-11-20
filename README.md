@@ -52,8 +52,8 @@ Full 70-second demo: [docs/media/demo.mp4](docs/media/demo.mp4).*
 | | |
 |---|---|
 | **What it does** | Multi-step research over your own PDFs with verified quotes, citations, human approval and an audit log |
-| **Skills shown** | LangGraph multi-agent workflow, MCP tool server, agent evals (accuracy, safety, latency, cost), guardrails against prompt injection and made-up numbers, human-in-the-loop, model routing (Claude ↔ Ollama Cloud/local Ollama ↔ Azure OpenAI), LoRA fine-tuning (PyTorch), Docker, GitHub Actions |
-| **Tech** | Python, FastAPI, LangGraph, MCP, Anthropic API, Ollama (Gemma 4 Cloud or local models, nomic-embed-text), Chroma, ONNX Runtime, SQLite, vanilla JS |
+| **Skills shown** | LangGraph multi-agent workflow, MCP tool server, agent evals (accuracy, safety, latency, cost), guardrails against prompt injection and made-up numbers, human-in-the-loop, model routing (Claude ↔ local Ollama ↔ Azure OpenAI), LoRA fine-tuning (PyTorch), Docker, GitHub Actions |
+| **Tech** | Python, FastAPI, LangGraph, MCP, Anthropic API, Ollama (Gemma 4 local models, nomic-embed-text), Chroma, ONNX Runtime, SQLite, vanilla JS |
 | **Runs** | Fully on a laptop with a local model, or with Claude via an API key |
 
 ## Architecture
@@ -274,17 +274,13 @@ Copied from `evals/results/` (answers shortened). Every run's ✓/✗ for each q
 ## Run it
 
 ```bash
-ollama signin
-ollama run gemma4:cloud
+ollama run gemma4:e4b
 ollama pull nomic-embed-text   # local embedding model; Gemma 4 Cloud is accessed through Ollama
 ./install.sh            # adds "Agentic Researcher" to the app menu (Linux; needs uv and Google Chrome)
 ```
 Or `uv run uvicorn app.server:app --port 8770` and open http://127.0.0.1:8770. Put PDFs in `data/datasheets/` and
-`data/papers/` (or drag them onto the Documents page). Open Settings → Models and choose **Local model (Ollama)** with **gemma4:cloud** (this is now the default).
-Sign in to Ollama once with `ollama signin`; the cloud model needs an internet connection and an active Ollama account.
-The app sends model requests to your local Ollama server at `http://127.0.0.1:11434`; Ollama securely routes
-`gemma4:cloud` to its cloud service. Set `OLLAMA_HOST` if your Ollama server is on another host.
-Cloud inference is not offline or free: the app records estimated Gemma 4 Cloud token costs and applies the per-run cost cap.
+`data/papers/` (or drag them onto the Documents page). Open Settings → Models and choose **Local model (Ollama)** with **gemma4:e4b** (this is now the default).
+The app sends model requests to your local Ollama server at `http://127.0.0.1:11434`. `gemma4:e4b` runs locally; after the model and embedding model are downloaded, inference does not require Ollama Cloud sign-in or an internet connection. Set `OLLAMA_HOST` if your Ollama server is on another host.
 To use a fully local model instead, select an installed local model in Settings. Add an Anthropic API key only if you
 explicitly switch the main provider to Claude.
 
