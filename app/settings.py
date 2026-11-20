@@ -6,12 +6,15 @@ and is never sent back to the browser: the UI only sees whether a key is set and
 
 import json
 import os
-import pwd
+import getpass
 import re
 import urllib.request
 from pathlib import Path
 
-CONF = Path.home() / ".config" / "agentic-researcher"
+if os.name == "nt":
+    CONF = Path(os.environ.get("APPDATA", Path.home() / "AppData" / "Roaming")) / "agentic-researcher"
+else:
+    CONF = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "agentic-researcher"
 FILE = CONF / "settings.json"
 ENV = CONF / "env"
 
@@ -68,8 +71,8 @@ def user_name() -> str:
     name = load()["reviewer_name"] or os.environ.get("REVIEWER_NAME", "")
     if name:
         return name
-    p = pwd.getpwuid(os.getuid())
-    return (p.pw_gecos.split(",")[0] or p.pw_name).strip()
+    # getpass works on Windows, macOS, and Linux (unlike the Unix-only pwd module).
+    return getpass.getuser().strip()
 
 
 def key_status() -> dict:
@@ -84,7 +87,12 @@ def _write_env(name: str, value: str | None) -> None:
     if value is not None:
         lines.append(f"{name}={value}")
     ENV.write_text("\n".join(lines) + "\n")
-    ENV.chmod(0o600)
+    # POSIX permissions are useful on Linux/macOS; Windows does not support
+    # chmod semantics in the same way, so do not fail settings updates there.
+    try:
+        ENV.chmod(0o600)
+    except OSError:
+        pass
 
 
 def set_key(key: str) -> dict:
