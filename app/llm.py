@@ -164,7 +164,7 @@ def complete_json(system: str, user: str, schema: dict, budget: Budget, purpose:
                   max_tokens: int = 2000, order: list | None = None) -> dict:
     errors = []
     for provider, model in order or route():
-        if provider != "ollama" and budget.cost_usd >= budget.cap_usd:
+        if budget.cost_usd >= budget.cap_usd:
             errors.append(f"{provider}: over the ${budget.cap_usd:.2f} per-run cap")
             continue
         t0 = time.perf_counter()
