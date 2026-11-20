@@ -24,7 +24,7 @@ DEFAULTS = {
     "reviewer_name": "",
     "provider": "ollama",               # Gemma 4 Cloud through the signed-in local Ollama server
     "anthropic_model": "claude-haiku-5-5",
-    "ollama_model": "gemma4:cloud",
+    "ollama_model": "gemma4:e4b",
     "cost_cap_usd": 0.05,              # per run
     "claim_checker": "rules",          # rules | auto (auto adds the fine-tuned model: fewer wrong citations, lower recall; see README)
     "tool_transport": "mcp",           # mcp | direct
